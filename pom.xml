@@ -12,7 +12,7 @@
 	<artifactId>PaymentApplication</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PaymentApplication</name>
-	<description>Application for ticket payments</description>
+	<description>Application for ticket tickets</description>
 
 	<properties>
 		<java.version>11</java.version>

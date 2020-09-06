@@ -1,6 +1,7 @@
 package com.example.paymentapp;
 
-import com.example.paymentapp.model.Payment;
+import com.example.paymentapp.model.Ticket;
+import com.example.paymentapp.model.Status;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,19 +39,45 @@ public class ApplicationTests {
 	}
 
 	@Test
-	public void testGetPaymentById() {
-		Payment payment = restTemplate.getForObject(getRootUrl() + "/payments/1", Payment.class);
-		log.info(payment.getRouteNumber());
-		Assert.assertNotNull(payment);
+	public void testGetTicketById() {
+		Ticket ticket = restTemplate.getForObject(getRootUrl() + "/api/tickets/1", Ticket.class);
+		log.info(ticket.getRouteNumber());
+		Assert.assertNotNull(ticket);
 	}
 
 	@Test
-	public void testCreatePayment() {
-		Payment payment = new Payment();
-		payment.setDepartureDate(LocalDate.of(2020, 11, 21));
-		payment.setRouteNumber(232);
+	public void testGetAllTickets(){
+		ResponseEntity<List<Ticket>> rateResponse =
+				restTemplate.exchange(getRootUrl() + "/api/tickets",
+						HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+		List<Ticket> tickets = rateResponse.getBody();
+		tickets.forEach(payment -> {
+			log.info(payment.toString());
+		});
+	}
 
-		ResponseEntity<Payment> postResponse = restTemplate.postForEntity(getRootUrl() + "/payments", payment, Payment.class);
+	@Test
+	public void testGetAllTicketsAfterCurrentDate(){
+		ResponseEntity<List<Ticket>> rateResponse =
+				restTemplate.exchange(getRootUrl() + "/api/tickets/afternow",
+						HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+		List<Ticket> tickets = rateResponse.getBody();
+		tickets.forEach(payment -> {
+			log.info(payment.toString());
+		});
+
+	}
+
+	@Test
+	public void testCreateTicket() {
+		Ticket ticket = new Ticket();
+		ticket.setDepartureDate(LocalDate.of(2020, 11, 21));
+		ticket.setRouteNumber(232);
+		ticket.setStatus(Status.COMPLETED);
+		ticket.setClientId(23L);
+		ticket.setTicketId(33345L);
+
+		ResponseEntity<Ticket> postResponse = restTemplate.postForEntity(getRootUrl() + "/tickets", ticket, Ticket.class);
 		Assert.assertNotNull(postResponse);
 		Assert.assertNotNull(postResponse.getBody());
 	}

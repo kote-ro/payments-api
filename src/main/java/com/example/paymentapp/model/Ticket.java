@@ -17,13 +17,17 @@ import java.time.LocalDate;
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "payments")
+@Table(name = "tickets")
 @EntityListeners(AuditingEntityListener.class)
-public class Payment {
+public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    private Long ticketId;
+
+    private Long clientId;
 
     @NotNull
     @Min(value=1, message="must be equal or greater than 1")
@@ -35,11 +39,23 @@ public class Payment {
 
     private Status status;
 
-    public Payment(Long id, Integer routeNumber, LocalDate departureDate) {
+    public Ticket(Long id, Long ticketId, Long clientId, Integer routeNumber, LocalDate departureDate) {
         this.id = id;
+        this.clientId = clientId;
+        this.ticketId = ticketId;
         this.routeNumber = routeNumber;
         this.departureDate = departureDate;
         this.status = null;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Ticket)
+                && (((Ticket) o).getTicketId()).equals(this.getTicketId());
+    }
+
+    @Override
+    public int hashCode() {
+        return ticketId.hashCode();
+    }
 }
