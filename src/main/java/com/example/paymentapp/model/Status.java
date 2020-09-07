@@ -11,11 +11,10 @@ public enum Status {
     ERROR,
     COMPLETED;
 
-    private static Random RANDOM = new Random();
-    private static int NUM = 2 + RANDOM.nextInt(4-3);
+    private static final Random RANDOM = new Random();
+    private static final int NUM = 2 + RANDOM.nextInt(4-3);
 
-    private static final List<Status> VALUES =
-            Collections.unmodifiableList(Arrays.asList(values()));
+    private static final List<Status> VALUES = List.of(values());
 
     // логика создания случайного статуса билета
     public static Status randomStatus()  {

@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TicketProcessingService {
     // каждые 60 секунд вызывать | синтакис (*/sec min hour day month day of week)
-    private static final String CRON = "*/2 * * * * *";
+    private static final String CRON = "*/60 * * * * *";
 
     @Autowired
     private TicketRepositoryService repositoryService;
@@ -33,27 +33,28 @@ public class TicketProcessingService {
     *  -> присвоение конечного статуса билету(IN_PROCESS/ERROR/COMPLETED) + сохранение значения
      */
     public void changeStatus(List<Ticket> list){
-
-        for(Ticket ticket : list){
-            try {
-                if (ticket.getStatus() == null || ticket.getStatus() == Status.STARTED_PROCESS) {
-                    ticket.setStatus(Status.STARTED_PROCESS);
-                    repositoryService.updateStatus(ticket.getId(), ticket.getStatus());
-                    /*
-                    * место потенциальной ошибки во время изменения статуса
-                    */
-                    ticket.setStatus(Status.randomStatus());
-                    repositoryService.updateStatus(ticket.getId(), ticket.getStatus());
-                    log.info("Changed ticket info, id = " + ticket.getId()
-                            + ", route number = " + ticket.getRouteNumber()
-                            + ", status = " + ticket.getStatus());
-                    break;
+        list.stream()
+                .parallel() // попытка сделать проведение заявок многопоточным
+                .forEach(ticket -> {
+                    try {
+                        if (ticket.getStatus() == null || ticket.getStatus() == Status.STARTED_PROCESS) {
+                            ticket.setStatus(Status.STARTED_PROCESS);
+                            repositoryService.updateStatus(ticket.getId(), ticket.getStatus());
+                            /*
+                             * место потенциальной ошибки во время изменения статуса
+                             */
+                            ticket.setStatus(Status.randomStatus());
+                            repositoryService.updateStatus(ticket.getId(), ticket.getStatus());
+                            log.info("Changed ticket info, id = " + ticket.getId()
+                                    + ", route number = " + ticket.getRouteNumber()
+                                    + ", status = " + ticket.getStatus());
+                        }
+                    } catch (Exception e) {
+                        log.error("Error in processing ticket with id " + ticket.getId() + " " + e.getMessage());
+                        log.error("More precise description of error : ", e);
+                    }
                 }
-            }catch (Exception e){
-                log.error("Error in processing ticket with id ", ticket.getId(), e.getMessage());
-                log.error("More precise description of error : ", e);
-            }
-        }
+        );
     }
 
 }
