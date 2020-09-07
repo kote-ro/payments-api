@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TicketProcessingService {
     // каждые 60 секунд вызывать | синтакис (*/sec min hour day month day of week)
-    private static final String CRON = "*/2 * * * * *";
+    private static final String CRON = "*/60 * * * * *";
 
     @Autowired
     private TicketRepositoryService repositoryService;
